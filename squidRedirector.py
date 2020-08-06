@@ -58,23 +58,25 @@ def read_config():
 
 
 def check_url(url):    
-    result, url = "ERR", ''
+    result, new_url = "ERR", ''
     
     config = read_config()
     # Если конфиг прочитать не удалось пропускаем все
     if config is None:
-        return result, url
-
-    for site_from, site_to in config.items():
-        if url.startswith(site_from):
-            url = url.replace(site_from, site_to)
-            url = "302:http://" + url 
-            result = "OK"
+        return result, new_url
     
-    return result, url
+    # Обходим все ключи в словаре
+    for site_from, site_to in config.items():
+        if site_from in url:
+            new_url = "302:http://" + site_to 
+            result = "OK"
+            redirect_logger.info(new_url)
+    
+    return result, new_url
 
 
 app_logger.info('Redirector started')
+
 while True:
     try:
         line  = sys.stdin.readline()
@@ -86,11 +88,8 @@ while True:
         app_logger.debug(err)
         break
 
-    result, new_url = check_url(line.split(' ')[0])
-    if result == "OK":
-        redirect_logger.info(new_url)
+    line_parts = line.split(' ')
+    result, new_url = check_url(line_parts[0])
 
     sys.stdout.write('%s %s\n' % (result, new_url) )
     sys.stdout.flush()
-
-
