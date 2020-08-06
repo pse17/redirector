@@ -58,21 +58,24 @@ def read_config():
 
 
 def check_url(url):    
-    result, new_url = "ERR", ''
+    result_line = 'ERR\n'
     
     config = read_config()
     # Если конфиг прочитать не удалось пропускаем все
     if config is None:
-        return result, new_url
+        return result_line
     
     # Обходим все ключи в словаре
     for site_from, site_to in config.items():
         if site_from in url:
-            new_url = "302:http://" + site_to 
             result = "OK"
-            redirect_logger.info(new_url)
+            kv_pairs = " status=301 url=https://" + site_to
+            new_url = " 301:https://" + site_to + "\n"
+            
+            result_line = result + kv_pairs + new_url
+            redirect_logger.info(result_line)
     
-    return result, new_url
+    return result_line
 
 
 app_logger.info('Redirector started')
@@ -85,11 +88,11 @@ while True:
         app_logger.debug('Redirector closed by EOF')
         break
     except Exception as err:
-        app_logger.debug(err)
+        app_logger.error(err)
         break
 
     line_parts = line.split(' ')
-    result, new_url = check_url(line_parts[0])
+    result_line = check_url(line_parts[0])
 
-    sys.stdout.write('%s %s\n' % (result, new_url) )
+    sys.stdout.write(result_line)
     sys.stdout.flush()
