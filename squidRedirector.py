@@ -1,10 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import sys
 import json
 import logging
 from logging import config
 
-CONFIG_PATH = '/etc/squid/redirector.json'
+CONFIG_PATH = '/usr/local/squidRedirector/redirector.conf'
 
 LOGGING = {
     'version': 1,
@@ -46,7 +46,7 @@ redirect_logger = logging.getLogger("redirect_logger")
 app_logger = logging.getLogger("app_logger")
 
 
-# Читаем конфиг на каждой итерации т.к. все изменения должны работать сразу
+# Читаем конфиг на каждом запросе т.к. все изменения должны работать сразу
 def read_config():
     try:
         with open(CONFIG_PATH) as config_file:
@@ -70,10 +70,10 @@ def check_url(url):
         if site_from in url:
             result = "OK"
             kv_pairs = " status=301 url=https://" + site_to
-            new_url = " 301:https://" + site_to + "\n"
+            new_url = " 301:https://" + site_to
             
-            result_line = result + kv_pairs + new_url
-            redirect_logger.info(result_line)
+            result_line = result + kv_pairs + new_url + "\n"
+            redirect_logger.info('Redirected from %s to %s' % (site_from, site_to))
     
     return result_line
 
@@ -83,7 +83,6 @@ app_logger.info('Redirector started')
 while True:
     try:
         line  = sys.stdin.readline()
-        app_logger.debug(line) # Для отладки
     except EOFError:
         app_logger.debug('Redirector closed by EOF')
         break
