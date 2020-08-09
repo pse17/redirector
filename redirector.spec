@@ -29,7 +29,9 @@ install -p -m 644 rsyslog_redirector.conf %{buildroot}/etc/rsyslog.d/
 /etc/rsyslog.d/rsyslog_redirector.conf
 
 %post
-echo "url_rewrite_program /usr/bin/python3 /usr/local/squidRedirector/squidRedirector.py" >> /etc/squid/squid.conf 
+echo "url_rewrite_program /usr/bin/python3 /usr/local/squidRedirector/squidRedirector.py" >> /etc/squid/squid.conf
+systemctl enable squid
+systemctl enable rsyslog 
 
 %changelog
 
